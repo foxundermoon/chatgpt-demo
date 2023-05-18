@@ -87,7 +87,7 @@ export default () => {
     try {
       const controller = new AbortController()
       setController(controller)
-      const requestMessageList = [...messageList()]
+      let requestMessageList = [...messageList()]
       if (currentSystemRoleSettings()) {
         requestMessageList.unshift({
           role: 'system',
@@ -95,7 +95,7 @@ export default () => {
         })
       }
       const timestamp = Date.now()
-      const response = await fetch('/api/generate', {
+      let response = await fetch('/api/generate', {
         method: 'POST',
         body: JSON.stringify({
           messages: requestMessageList,
@@ -110,9 +110,43 @@ export default () => {
       })
       if (!response.ok) {
         const error = await response.json()
-        console.error(error.error)
-        setCurrentError(error.error)
-        throw new Error('Request failed')
+        console.error(error.error);
+        if (error.error.code === "context_length_exceeded") {
+          const len = requestMessageList.length;
+          const trimLen = Math.min(len, 6);
+          const trimedMessageList = [...messageList().slice(trimLen)];
+          requestMessageList = trimedMessageList;
+          if (currentSystemRoleSettings()) {
+            requestMessageList.unshift({
+              role: "system",
+              content: currentSystemRoleSettings(),
+            });
+          }
+
+          setMessageList(trimedMessageList);
+          console.log(
+            `before len: ${len}, after trim len: ${requestMessageList.length}`
+          );
+          response = await fetch("/api/generate", {
+            method: "POST",
+            body: JSON.stringify({
+              messages: requestMessageList,
+              time: timestamp,
+              pass: storagePassword,
+              sign: await generateSignature({
+                t: timestamp,
+                m:
+                  requestMessageList?.[requestMessageList.length - 1]
+                    ?.content || "",
+              }),
+            }),
+            signal: controller.signal,
+          });
+        } else {
+					console.error(error.error)
+          setCurrentError(error.error);
+          throw new Error("Request failed");
+        }
       }
       const data = response.body
       if (!data)
