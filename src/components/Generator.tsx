@@ -6,6 +6,7 @@ import MessageItem from './MessageItem'
 import SystemRoleSettings from './SystemRoleSettings'
 import ErrorMessageItem from './ErrorMessageItem'
 import type { ChatMessage, ErrorMessage } from '@/types'
+import toast, { Toaster } from 'solid-toast';
 
 export default () => {
   let inputRef: HTMLTextAreaElement
@@ -113,7 +114,8 @@ export default () => {
         console.error(error.error);
         if (error.error.code === "context_length_exceeded") {
           const len = requestMessageList.length;
-          const trimLen = Math.min(len, 6);
+          const trimLen = Math.min(len, 4);
+					toast.success(`The context length exceeds the limit, the first ${trimLen} messages will be deleted.`)
           const trimedMessageList = [...messageList().slice(trimLen)];
           requestMessageList = trimedMessageList;
           if (currentSystemRoleSettings()) {
@@ -233,6 +235,7 @@ export default () => {
 
   return (
     <div my-6>
+			<Toaster />
       <SystemRoleSettings
         canEdit={() => messageList().length === 0}
         systemRoleEditing={systemRoleEditing}
