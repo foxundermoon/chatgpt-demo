@@ -237,7 +237,7 @@ export default () => {
     <div my-6>
 			<Toaster />
       <SystemRoleSettings
-        canEdit={() => messageList().length === 0}
+        canEdit={() =>true /* messageList().length === 0 */}
         systemRoleEditing={systemRoleEditing}
         setSystemRoleEditing={setSystemRoleEditing}
         currentSystemRoleSettings={currentSystemRoleSettings}

@@ -1,6 +1,7 @@
 import { Show } from 'solid-js'
 import IconEnv from './icons/Env'
 import IconX from './icons/X'
+import IconEdit from './icons/Edit'
 import type { Accessor, Setter } from 'solid-js'
 
 interface Props {
@@ -27,6 +28,13 @@ export default (props: Props) => {
             <div class="fi gap-1 op-50 dark:op-60">
               <Show when={props.canEdit()} fallback={<IconEnv />}>
                 <span onClick={() => props.setCurrentSystemRoleSettings('')} class="sys-edit-btn p-1 rd-50%" > <IconX /> </span>
+              </Show>
+              <Show when={props.canEdit()} fallback={<IconEnv />}>
+                <span onClick={() => {
+									props.setSystemRoleEditing(true)
+									systemInputRef.value = props.currentSystemRoleSettings()
+								}
+									} class="sys-edit-btn p-1 rd-50%" > <IconEdit /> </span>
               </Show>
               <span>System Role: </span>
             </div>
